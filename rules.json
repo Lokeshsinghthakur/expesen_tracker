@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "_about": "Put this file in your GitHub repo and set REMOTE_RULES_URL in src/services/remoteRules.ts to its raw URL. Bump 'version' every time you edit. textReplacements run BEFORE the classifier (teach new words). rules run AFTER it; the FIRST matching rule overrides the result. A rule needs senderRegex and/or textRegex (case-insensitive regex); notTextRegex excludes. 'set' can hold: isTransaction, type, category, subCategory, merchant, needsReview. Test everything in tools/sms-tester.html first.",
+  "textReplacements": [
+    {
+      "pattern": "कटौती|काट\\s*लिए\\s*गए",
+      "replace": " debited "
+    },
+    {
+      "pattern": "जमा\\s*राशि",
+      "replace": " credited "
+    },
+    {
+      "pattern": "mandate\\s+debit",
+      "replace": " mandate scheduled "
+    }
+  ],
+  "rules": [
+    {
+      "id": "canara-upcoming-mandate",
+      "senderRegex": "CANBNK|CANARA",
+      "textRegex": "upcoming mandate|autopay mandate",
+      "notTextRegex": "has been debited|was debited",
+      "set": {
+        "isTransaction": false,
+        "type": "NON_TRANSACTIONAL"
+      }
+    },
+    {
+      "id": "credit-card-payment-received",
+      "textRegex": "payment of .* (has been )?(received|reeived|recieved) on your .* credit card",
+      "set": {
+        "type": "CREDIT_CARD_PAYMENT",
+        "isTransaction": true
+      }
+    },
+    {
+      "id": "ignore-otp-promos",
+      "textRegex": "\\botp\\b|one time password|verification code",
+      "notTextRegex": "debited|credited",
+      "set": {
+        "isTransaction": false,
+        "type": "NON_TRANSACTIONAL"
+      }
+    },
+    {
+      "id": "example-disabled-rule-delete-me",
+      "senderRegex": "EXAMPLE",
+      "textRegex": "example shop",
+      "set": {
+        "merchant": "Example Shop",
+        "category": "Shopping",
+        "subCategory": "Other"
+      }
+    }
+  ]
+}
